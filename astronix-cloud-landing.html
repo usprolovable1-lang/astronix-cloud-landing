@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astronix Cloud - Next-Gen Infrastructure</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@11/dist/framer-motion.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: #000;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        @keyframes gridScroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .animate-gradient {
+            background-size: 200% 200%;
+            animation: gradient 3s ease infinite;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #06b6d4, #a855f7);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #0891b2, #9333ea);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { motion, useAnimation, useInView } = Motion;
+
+        // Lucide React Icons (inline SVG components)
+        const Server = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+        );
+
+        const Cpu = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                <rect x="9" y="9" width="6" height="6"></rect>
+                <line x1="9" y1="1" x2="9" y2="4"></line>
+                <line x1="15" y1="1" x2="15" y2="4"></line>
+                <line x1="9" y1="20" x2="9" y2="23"></line>
+                <line x1="15" y1="20" x2="15" y2="23"></line>
+                <line x1="20" y1="9" x2="23" y2="9"></line>
+                <line x1="20" y1="14" x2="23" y2="14"></line>
+                <line x1="1" y1="9" x2="4" y2="9"></line>
+                <line x1="1" y1="14" x2="4" y2="14"></line>
+            </svg>
+        );
+
+        const Activity = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+        );
+
+        const Shield = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+        );
+
+        const Zap = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+        );
+
+        const Clock = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+        );
+
+        const Globe = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+        );
+
+        const CheckCircle2 = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="m9 12 2 2 4-4"></path>
+            </svg>
+        );
+
+        const ArrowRight = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        );
+
+        // Background Component
+        const CyberpunkBackground = () => {
+            return (
+                <div className="fixed inset-0 -z-10 overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(17,24,39,1),rgba(0,0,0,1))]">
+                        <div className="absolute inset-0" style={{
+                            backgroundImage: `
+                                linear-gradient(rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+                                linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px)
+                            `,
+                            backgroundSize: '50px 50px',
+                            animation: 'gridScroll 20s linear infinite'
+                        }} />
+                    </div>
+                    
+                    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-[120px] animate-pulse" />
+                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[120px]" style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '1s' }} />
+                    
+                    <div className="absolute inset-0">
+                        {[...Array(20)].map((_, i) => (
+                            <motion.div
+                                key={i}
+                                className="absolute w-1 h-1 bg-cyan-400 rounded-full"
+                                initial={{
+                                    x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920),
+                                    y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080),
+                                    opacity: 0
+                                }}
+                                animate={{
+                                    y: [null, -100, -200],
+                                    opacity: [0, 1, 0]
+                                }}
+                                transition={{
+                                    duration: 3 + Math.random() * 2,
+                                    repeat: Infinity,
+                                    delay: Math.random() * 5
+                                }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // Animated Section Wrapper
+        const AnimatedSection = ({ children, className = "" }) => {
+            const ref = useRef(null);
+            const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+            return (
+                <motion.div
+                    ref={ref}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className={className}
+                >
+                    {children}
+                </motion.div>
+            );
+        };
+
+        // Hero Section
+        const HeroSection = () => {
+            return (
+                <section className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
+                    <div className="max-w-7xl mx-auto text-center z-10">
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8 }}
+                        >
+                            <motion.div
+                                className="inline-block mb-6 px-6 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/5"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.2, type: "spring" }}
+                            >
+                                <span className="text-cyan-400 text-sm font-mono">NEXT-GENERATION CLOUD INFRASTRUCTURE</span>
+                            </motion.div>
+                            
+                            <h1 className="text-6xl md:text-8xl font-black mb-6 tracking-tight">
+                                <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradient">
+                                    ASTRONIX
+                                </span>
+                                <br />
+                                <span className="text-white">CLOUD</span>
+                            </h1>
+                            
+                            <p className="text-xl md:text-2xl text-gray-400 mb-4 font-light max-w-3xl mx-auto">
+                                Enterprise-Grade Virtual Private Servers
+                            </p>
+                            
+                            <div className="flex flex-wrap justify-center gap-6 text-sm md:text-base mb-12">
+                                <div className="flex items-center gap-2 text-cyan-400">
+                                    <Zap className="w-4 h-4" />
+                                    <span>NVMe SSD Storage</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-cyan-400">
+                                    <Activity className="w-4 h-4" />
+                                    <span>10Gbps Network</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-cyan-400">
+                                    <Globe className="w-4 h-4" />
+                                    <span>Tier 4 Datacenters</span>
+                                </div>
+                            </div>
+                            
+                            <motion.a
+                                href="https://t.me/offx_sahil"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg text-white font-semibold text-lg group relative overflow-hidden"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <span className="relative z-10">Get Started Now</span>
+                                <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </motion.a>
+                        </motion.div>
+                    </div>
+                    
+                    <motion.div
+                        className="absolute bottom-12 left-1/2 -translate-x-1/2"
+                        animate={{ y: [0, 10, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                    >
+                        <div className="w-6 h-10 border-2 border-cyan-500/50 rounded-full flex justify-center p-2">
+                            <motion.div
+                                className="w-1 h-2 bg-cyan-400 rounded-full"
+                                animate={{ y: [0, 12, 0] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                            />
+                        </div>
+                    </motion.div>
+                </section>
+            );
+        };
+
+        // Feature Card
+        const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
+            return (
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay, duration: 0.5 }}
+                    className="group relative"
+                >
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative p-8 rounded-2xl border border-cyan-500/20 bg-gray-900/50 backdrop-blur-xl hover:border-cyan-500/50 transition-all duration-300">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <Icon className="w-7 h-7 text-cyan-400" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
+                        <p className="text-gray-400 leading-relaxed">{description}</p>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        // Features Section
+        const FeaturesSection = () => {
+            const features = [
+                {
+                    icon: Shield,
+                    title: "99.9% Uptime SLA",
+                    description: "Enterprise-grade infrastructure with redundant systems ensuring your services stay online 24/7."
+                },
+                {
+                    icon: Zap,
+                    title: "Instant Setup",
+                    description: "Deploy your VPS in under 60 seconds with automated provisioning and zero configuration hassle."
+                },
+                {
+                    icon: Activity,
+                    title: "DDoS Protection",
+                    description: "Advanced multi-layered DDoS mitigation protecting your infrastructure from any scale of attack."
+                },
+                {
+                    icon: Clock,
+                    title: "24/7 Expert Support",
+                    description: "Round-the-clock technical support from certified engineers ready to assist you anytime."
+                }
+            ];
+
+            return (
+                <AnimatedSection className="py-32 px-4">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-20">
+                            <motion.h2
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
+                                viewport={{ once: true }}
+                                className="text-5xl md:text-6xl font-black text-white mb-6"
+                            >
+                                Why Choose <span className="text-cyan-400">Astronix</span>
+                            </motion.h2>
+                            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+                                Cutting-edge technology meets unparalleled reliability
+                            </p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {features.map((feature, index) => (
+                                <FeatureCard key={index} {...feature} delay={index * 0.1} />
+                            ))}
+                        </div>
+                    </div>
+                </AnimatedSection>
+            );
+        };
+
+        // Live Monitoring
+        const LiveMonitoring = () => {
+            const [cpuLoad, setCpuLoad] = useState(45);
+            const [networkStatus, setNetworkStatus] = useState(98);
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setCpuLoad(40 + Math.random() * 20);
+                    setNetworkStatus(95 + Math.random() * 5);
+                }, 2000);
+                return () => clearInterval(interval);
+            }, []);
+
+            return (
+                <AnimatedSection className="py-32 px-4">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-16">
+                            <h2 className="text-5xl font-black text-white mb-6">
+                                Real-Time <span className="text-cyan-400">Infrastructure</span>
+                            </h2>
+                            <p className="text-xl text-gray-400">Monitor global network performance live</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                className="p-8 rounded-2xl border border-cyan-500/20 bg-gray-900/50 backdrop-blur-xl relative overflow-hidden group"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="relative">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <Cpu className="w-6 h-6 text-cyan-400" />
+                                            <h3 className="text-2xl font-bold text-white">Server Load</h3>
+                                        </div>
+                                        <div className="px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30">
+                                            <span className="text-green-400 text-sm font-mono">OPTIMAL</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <div className="flex justify-between mb-2">
+                                            <span className="text-gray-400">CPU Usage</span>
+                                            <span className="text-cyan-400 font-mono">{cpuLoad.toFixed(1)}%</span>
+                                        </div>
+                                        <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
+                                            <motion.div
+                                                className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full"
+                                                animate={{ width: `${cpuLoad}%` }}
+                                                transition={{ duration: 0.5 }}
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-3 gap-4 mt-6">
+                                        <div>
+                                            <div className="text-gray-400 text-sm mb-1">Cores</div>
+                                            <div className="text-white font-bold text-xl">128</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-gray-400 text-sm mb-1">Memory</div>
+                                            <div className="text-white font-bold text-xl">2TB</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-gray-400 text-sm mb-1">Storage</div>
+                                            <div className="text-white font-bold text-xl">50TB</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                className="p-8 rounded-2xl border border-purple-500/20 bg-gray-900/50 backdrop-blur-xl relative overflow-hidden group"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="relative">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <Globe className="w-6 h-6 text-purple-400" />
+                                            <h3 className="text-2xl font-bold text-white">Network Status</h3>
+                                        </div>
+                                        <div className="px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30">
+                                            <span className="text-green-400 text-sm font-mono">ONLINE</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <div className="flex justify-between mb-2">
+                                            <span className="text-gray-400">Global Availability</span>
+                                            <span className="text-purple-400 font-mono">{networkStatus.toFixed(1)}%</span>
+                                        </div>
+                                        <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
+                                            <motion.div
+                                                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                                                animate={{ width: `${networkStatus}%` }}
+                                                transition={{ duration: 0.5 }}
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-3 gap-4 mt-6">
+                                        <div>
+                                            <div className="text-gray-400 text-sm mb-1">Latency</div>
+                                            <div className="text-white font-bold text-xl">12ms</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-gray-400 text-sm mb-1">Bandwidth</div>
+                                            <div className="text-white font-bold text-xl">10Gb</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-gray-400 text-sm mb-1">Locations</div>
+                                            <div className="text-white font-bold text-xl">15+</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </AnimatedSection>
+            );
+        };
+
+        // Pricing Card
+        const PricingCard = ({ cores, ram, price, category, index }) => {
+            return (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ y: -8, scale: 1.02 }}
+                    className="group relative"
+                >
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-100 blur transition-opacity duration-500" />
+                    
+                    <div className="relative p-6 rounded-2xl border border-cyan-500/20 bg-gray-900/80 backdrop-blur-xl hover:border-cyan-500/50 transition-all duration-300">
+                        <div className="flex justify-between items-start mb-4">
+                            <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Server className="w-5 h-5 text-cyan-400" />
+                                    <span className="text-sm text-gray-400 font-mono">{category}</span>
+                                </div>
+                                <h3 className="text-2xl font-bold text-white mb-1">
+                                    {cores} Core{cores > 1 ? 's' : ''}
+                                </h3>
+                                <p className="text-cyan-400 font-semibold">{ram} RAM</p>
+                            </div>
+                            
+                            <div className="text-right">
+                                <div className="text-3xl font-black text-white">₹{price}</div>
+                                <div className="text-sm text-gray-500">/month</div>
+                            </div>
+                        </div>
+                        
+                        <div className="space-y-2 mb-6">
+                            <div className="flex items-center gap-2 text-sm text-gray-400">
+                                <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+                                <span>NVMe SSD Storage</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-400">
+                                <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+                                <span>10Gbps Network</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-400">
+                                <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+                                <span>DDoS Protection</span>
+                            </div>
+                        </div>
+                        
+                        <motion.a
+                            href="https://t.me/offx_sahil"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="block w-full py-3 px-4 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg text-white font-semibold text-center group/btn relative overflow-hidden"
+                        >
+                            <span className="relative z-10">Order Now</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+                        </motion.a>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        // Pricing Section
+        const PricingSection = () => {
+            const [activeCategory, setActiveCategory] = useState(0);
+
+            const categories = [
+                {
+                    id: 0,
+                    name: "Normal CPU VPS",
+                    icon: "🖥️",
+                    plans: [
+                        { cores: 1, ram: "4GB", basePrice: 100 },
+                        { cores: 2, ram: "8GB", basePrice: 200 },
+                        { cores: 4, ram: "8GB", basePrice: 250 },
+                        { cores: 4, ram: "16GB", basePrice: 350 },
+                        { cores: 4, ram: "32GB", basePrice: 450 },
+                        { cores: 4, ram: "64GB", basePrice: 550 },
+                        { cores: 8, ram: "16GB", basePrice: 650 },
+                        { cores: 8, ram: "32GB", basePrice: 750 },
+                        { cores: 8, ram: "64GB", basePrice: 850 },
+                        { cores: 16, ram: "32GB", basePrice: 1000 },
+                        { cores: 16, ram: "64GB", basePrice: 1500 },
+                        { cores: 32, ram: "64GB", basePrice: 2000 },
+                        { cores: 64, ram: "32GB", basePrice: 2500 },
+                        { cores: 64, ram: "512GB", basePrice: 3500 }
+                    ],
+                    modifier: (price) => price
+                },
+                {
+                    id: 1,
+                    name: "Admin RDP",
+                    icon: "🔑",
+                    plans: [
+                        { cores: 1, ram: "4GB", basePrice: 100 },
+                        { cores: 2, ram: "8GB", basePrice: 200 },
+                        { cores: 4, ram: "8GB", basePrice: 250 },
+                        { cores: 4, ram: "16GB", basePrice: 350 },
+                        { cores: 4, ram: "32GB", basePrice: 450 },
+                        { cores: 4, ram: "64GB", basePrice: 550 },
+                        { cores: 8, ram: "16GB", basePrice: 650 },
+                        { cores: 8, ram: "32GB", basePrice: 750 },
+                        { cores: 8, ram: "64GB", basePrice: 850 },
+                        { cores: 16, ram: "32GB", basePrice: 1000 },
+                        { cores: 16, ram: "64GB", basePrice: 1500 },
+                        { cores: 32, ram: "64GB", basePrice: 2000 },
+                        { cores: 64, ram: "32GB", basePrice: 2500 },
+                        { cores: 64, ram: "512GB", basePrice: 3500 }
+                    ],
+                    modifier: (price) => price + 20
+                },
+                {
+                    id: 2,
+                    name: "GPU VPS",
+                    icon: "🔥",
+                    plans: [
+                        { cores: 1, ram: "4GB", basePrice: 100 },
+                        { cores: 2, ram: "8GB", basePrice: 200 },
+                        { cores: 4, ram: "8GB", basePrice: 250 },
+                        { cores: 4, ram: "16GB", basePrice: 350 },
+                        { cores: 4, ram: "32GB", basePrice: 450 },
+                        { cores: 4, ram: "64GB", basePrice: 550 },
+                        { cores: 8, ram: "16GB", basePrice: 650 },
+                        { cores: 8, ram: "32GB", basePrice: 750 },
+                        { cores: 8, ram: "64GB", basePrice: 850 },
+                        { cores: 16, ram: "32GB", basePrice: 1000 },
+                        { cores: 16, ram: "64GB", basePrice: 1500 },
+                        { cores: 32, ram: "64GB", basePrice: 2000 },
+                        { cores: 64, ram: "32GB", basePrice: 2500 },
+                        { cores: 64, ram: "512GB", basePrice: 3500 }
+                    ],
+                    modifier: (price, cores) => {
+                        if (cores <= 4) return price + 50;
+                        return price + 200;
+                    }
+                },
+                {
+                    id: 3,
+                    name: "GPU RDP",
+                    icon: "⚡",
+                    plans: [
+                        { cores: 1, ram: "4GB", basePrice: 100 },
+                        { cores: 2, ram: "8GB", basePrice: 200 },
+                        { cores: 4, ram: "8GB", basePrice: 250 },
+                        { cores: 4, ram: "16GB", basePrice: 350 },
+                        { cores: 4, ram: "32GB", basePrice: 450 },
+                        { cores: 4, ram: "64GB", basePrice: 550 },
+                        { cores: 8, ram: "16GB", basePrice: 650 },
+                        { cores: 8, ram: "32GB", basePrice: 750 },
+                        { cores: 8, ram: "64GB", basePrice: 850 },
+                        { cores: 16, ram: "32GB", basePrice: 1000 },
+                        { cores: 16, ram: "64GB", basePrice: 1500 },
+                        { cores: 32, ram: "64GB", basePrice: 2000 },
+                        { cores: 64, ram: "32GB", basePrice: 2500 },
+                        { cores: 64, ram: "512GB", basePrice: 3500 }
+                    ],
+                    modifier: (price) => price + 200
+                }
+            ];
+
+            const activeTab = categories[activeCategory];
+
+            return (
+                <AnimatedSection className="py-32 px-4">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-16">
+                            <h2 className="text-5xl md:text-6xl font-black text-white mb-6">
+                                Flexible <span className="text-cyan-400">Pricing</span>
+                            </h2>
+                            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+                                Choose the perfect configuration for your needs
+                            </p>
+                        </div>
+
+                        <div className="flex flex-wrap justify-center gap-4 mb-16">
+                            {categories.map((category) => (
+                                <motion.button
+                                    key={category.id}
+                                    onClick={() => setActiveCategory(category.id)}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className={`px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
+                                        activeCategory === category.id
+                                            ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-lg shadow-cyan-500/50'
+                                            : 'bg-gray-800/50 text-gray-400 border border-gray-700 hover:border-cyan-500/50'
+                                    }`}
+                                >
+                                    <span className="mr-2">{category.icon}</span>
+                                    {category.name}
+                                </motion.button>
+                            ))}
+                        </div>
+
+                        <motion.div
+                            key={activeCategory}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                        >
+                            {activeTab.plans.map((plan, index) => (
+                                <PricingCard
+                                    key={index}
+                                    cores={plan.cores}
+                                    ram={plan.ram}
+                                    price={activeTab.modifier(plan.basePrice, plan.cores)}
+                                    category={activeTab.name}
+                                    index={index}
+                                />
+                            ))}
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            viewport={{ once: true }}
+                            className="mt-12 text-center"
+                        >
+                            <p className="text-gray-500 text-sm">
+                                All prices are in INR (₹). Custom configurations available on request.
+                            </p>
+                        </motion.div>
+                    </div>
+                </AnimatedSection>
+            );
+        };
+
+        // Footer
+        const Footer = () => {
+            return (
+                <footer className="relative py-16 px-4 border-t border-cyan-500/10">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                            <div>
+                                <h3 className="text-3xl font-black mb-4">
+                                    <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                                        ASTRONIX
+                                    </span>
+                                </h3>
+                                <p className="text-gray-400 mb-4">
+                                    Next-generation cloud infrastructure built for performance and reliability.
+                                </p>
+                                <div className="flex gap-4">
+                                    <motion.a
+                                        href="https://t.me/offx_sahil"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        whileHover={{ scale: 1.1, rotate: 5 }}
+                                        className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+                                    >
+                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/>
+                                        </svg>
+                                    </motion.a>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="text-white font-bold mb-4">Services</h4>
+                                <ul className="space-y-2 text-gray-400">
+                                    <li><a href="#" className="hover:text-cyan-400 transition-colors">Normal CPU VPS</a></li>
+                                    <li><a href="#" className="hover:text-cyan-400 transition-colors">Admin RDP</a></li>
+                                    <li><a href="#" className="hover:text-cyan-400 transition-colors">GPU VPS</a></li>
+                                    <li><a href="#" className="hover:text-cyan-400 transition-colors">GPU RDP</a></li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 className="text-white font-bold mb-4">Get in Touch</h4>
+                                <div className="space-y-3">
+                                    <a
+                                        href="https://t.me/offx_sahil"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors"
+                                    >
+                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/>
+                                            </svg>
+                                        </div>
+                                        <span>@offx_sahil</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-8 border-t border-cyan-500/10 text-center text-gray-500 text-sm">
+                            <p>&copy; 2026 Astronix Cloud. All rights reserved.</p>
+                        </div>
+                    </div>
+                </footer>
+            );
+        };
+
+        // Main App
+        function AstronixCloudLanding() {
+            return (
+                <div className="min-h-screen bg-black text-white font-sans antialiased overflow-x-hidden">
+                    <CyberpunkBackground />
+                    
+                    <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-6 backdrop-blur-xl bg-black/30 border-b border-cyan-500/10">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between">
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="text-2xl font-black"
+                            >
+                                <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                                    ASTRONIX
+                                </span>
+                            </motion.div>
+                            
+                            <motion.a
+                                href="https://t.me/offx_sahil"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg text-white font-semibold hidden md:block"
+                            >
+                                Contact Us
+                            </motion.a>
+                        </div>
+                    </nav>
+
+                    <HeroSection />
+                    <FeaturesSection />
+                    <LiveMonitoring />
+                    <PricingSection />
+                    <Footer />
+                </div>
+            );
+        }
+
+        // Render
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AstronixCloudLanding />);
+    </script>
+</body>
+</html>
